@@ -13,8 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 
 // Add DB context
+var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 // JWT setup
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
