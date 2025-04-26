@@ -1,12 +1,18 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TinyTitan.Habits.API.Models;
+namespace TinyTitanHabits.Models;
 
 public class User : BaseEntity
 {
-    public string Username { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string PasswordHash { get; set; } = string.Empty;
+    [Required]
+    public required string Name { get; set; }
 
-    public ICollection<Habit> Habits { get; set; }
+    [Required]
+    [EmailAddress]
+    public required string Email { get; set; }
+
+    [Required]
+    public required string PasswordHash { get; set; }
+
+    public ICollection<Habit> Habits { get; set; } = new List<Habit>();
 }

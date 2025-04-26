@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
-using TinyTitan.Habits.API.Data;
+using TinyTitanHabits.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using DotNetEnv;
-using TinyTitan.Habits.API.Auth;
+using TinyTitanHabits.Auth;
+using TinyTitanHabits.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,16 +15,16 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 
 // Add DB context
-var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING")!;
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 // JWT setup
-var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
-var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
-var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
-var jwtExpiryMinutes = Environment.GetEnvironmentVariable("JWT_EXPIRY_MINUTES");
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")!;
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER")!;
+var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")!;
+var jwtExpiryMinutes = Environment.GetEnvironmentVariable("JWT_EXPIRY_MINUTES")!;
+var jwtSettings = builder.Configuration.GetSection("JwtSettings")!;
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
@@ -39,9 +41,33 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<HabitService>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
+
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(x => x.Value != null && x.Value.Errors.Count > 0)
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
+
+            var problemDetails = new ValidationProblemDetails(errors)
+            {
+                Title = "One or more validation errors occurred.",
+                Status = StatusCodes.Status400BadRequest
+            };
+
+            return new BadRequestObjectResult(problemDetails);
+        };
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TinyTitan API", Version = "v1" });

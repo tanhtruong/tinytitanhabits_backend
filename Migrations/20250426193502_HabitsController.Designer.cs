@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TinyTitan.Habits.API.Data;
+using TinyTitanHabits.Data;
 
 #nullable disable
 
-namespace tinytitanhabits_backend.Migrations
+namespace TinyTitanHabits.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250426150034_init")]
-    partial class init
+    [Migration("20250426193502_HabitsController")]
+    partial class HabitsController
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace tinytitanhabits_backend.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TinyTitan.Habits.API.Models.Habit", b =>
+            modelBuilder.Entity("TinyTitanHabits.Models.Habit", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -42,6 +42,9 @@ namespace tinytitanhabits_backend.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastCompletedDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -63,7 +66,7 @@ namespace tinytitanhabits_backend.Migrations
                     b.ToTable("Habits");
                 });
 
-            modelBuilder.Entity("TinyTitan.Habits.API.Models.User", b =>
+            modelBuilder.Entity("TinyTitanHabits.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -79,6 +82,10 @@ namespace tinytitanhabits_backend.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");
@@ -86,18 +93,14 @@ namespace tinytitanhabits_backend.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("TinyTitan.Habits.API.Models.Habit", b =>
+            modelBuilder.Entity("TinyTitanHabits.Models.Habit", b =>
                 {
-                    b.HasOne("TinyTitan.Habits.API.Models.User", "User")
+                    b.HasOne("TinyTitanHabits.Models.User", "User")
                         .WithMany("Habits")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -106,7 +109,7 @@ namespace tinytitanhabits_backend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TinyTitan.Habits.API.Models.User", b =>
+            modelBuilder.Entity("TinyTitanHabits.Models.User", b =>
                 {
                     b.Navigation("Habits");
                 });

@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TinyTitan.Habits.API.Auth;
-using TinyTitan.Habits.API.Data;
-using TinyTitan.Habits.API.DTOs;
-using TinyTitan.Habits.API.Models;
+using TinyTitanHabits.Auth;
+using TinyTitanHabits.Data;
+using TinyTitanHabits.DTOs;
+using TinyTitanHabits.Models;
 
-namespace TinyTitan.Habits.API.Controllers;
+namespace TinyTitanHabits.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -30,7 +30,7 @@ public class AuthController : ControllerBase
 
         var user = new User
         {
-            Username = dto.Name,
+            Name = dto.Name,
             Email = dto.Email,
             PasswordHash = _authService.HashPassword(dto.Password)
         };

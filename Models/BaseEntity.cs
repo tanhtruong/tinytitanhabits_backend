@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TinyTitan.Habits.API.Models;
+namespace TinyTitanHabits.Models;
 
 public abstract class BaseEntity
 {

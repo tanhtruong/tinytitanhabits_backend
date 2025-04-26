@@ -1,11 +1,11 @@
-using TinyTitan.Habits.API.Models;
+using TinyTitanHabits.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using BCrypt.Net;
 
-namespace TinyTitan.Habits.API.Auth;
+namespace TinyTitanHabits.Auth;
 
 public class AuthService
 {
@@ -28,23 +28,27 @@ public class AuthService
 
     public string GenerateJwtToken(User user)
     {
-        var jwtSettings = _configuration.GetSection("JwtSettings");
+        var secret = Environment.GetEnvironmentVariable("JWT_SECRET")!;
+        var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")!;
+        var audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")!;
+        var expiryMinutes = double.Parse(Environment.GetEnvironmentVariable("JWT_EXPIRY_MINUTES")!);
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.Name),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"]));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: jwtSettings["Issuer"],
-            audience: jwtSettings["Audience"],
+            issuer: issuer,
+            audience: audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["ExpiryMinutes"])),
+            expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
             signingCredentials: creds
         );
 

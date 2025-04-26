@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using TinyTitan.Habits.API.Models;
+using TinyTitanHabits.Models;
 
-namespace TinyTitan.Habits.API.Data;
+namespace TinyTitanHabits.Data;
 
 public class AppDbContext : DbContext
 {
