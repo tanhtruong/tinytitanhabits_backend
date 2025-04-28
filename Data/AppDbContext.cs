@@ -9,4 +9,6 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Habit> Habits { get; set; }
+    public DbSet<HabitCompletion> HabitCompletions { get; set; }
+    public DbSet<TaskItem> Tasks { get; set; }
 }

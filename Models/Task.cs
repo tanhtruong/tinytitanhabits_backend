@@ -3,17 +3,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TinyTitanHabits.Models;
 
-public class Habit : BaseEntity
+public class TaskItem : BaseEntity
 {
     [Required]
     public required string Name { get; set; }
 
     public string? Description { get; set; }
 
+    public bool IsCompleted { get; set; } = false;
+
     [ForeignKey("User")]
     public Guid UserId { get; set; }
 
     public User? User { get; set; }
-
-    public ICollection<HabitCompletion> Completions { get; set; } = new List<HabitCompletion>();
 }

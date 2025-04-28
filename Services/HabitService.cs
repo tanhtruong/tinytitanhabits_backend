@@ -25,8 +25,6 @@ public class HabitService
             Id = h.Id,
             Name = h.Name,
             Description = h.Description,
-            IsCompletedToday = h.IsCompletedToday,
-            StreakCount = h.StreakCount,
             CreatedAt = h.CreatedAt
         }).ToList();
     }
@@ -48,8 +46,6 @@ public class HabitService
             Id = habit.Id,
             Name = habit.Name,
             Description = habit.Description,
-            IsCompletedToday = habit.IsCompletedToday,
-            StreakCount = habit.StreakCount,
             CreatedAt = habit.CreatedAt
         };
     }
@@ -80,27 +76,29 @@ public class HabitService
     }
 
     public async Task<bool> CompleteHabitTodayAsync(Guid habitId)
-{
-    var habit = await _dbContext.Habits.FindAsync(habitId);
-    if (habit == null || habit.IsDeleted) return false;
-
-    var today = DateTime.UtcNow.Date;
-
-    // Reset streak if missed
-    if (habit.LastCompletedDate.HasValue && (today - habit.LastCompletedDate.Value.Date).Days > 1)
     {
-        habit.StreakCount = 0;
-    }
+        var habit = await _dbContext.Habits
+            .Include(h => h.Completions)
+            .FirstOrDefaultAsync(h => h.Id == habitId && !h.IsDeleted);
 
-    if (!habit.IsCompletedToday)
-    {
-        habit.IsCompletedToday = true;
-        habit.StreakCount++;
-        habit.LastCompletedDate = today;
-        habit.UpdatedAt = DateTime.UtcNow;
+        if (habit == null) return false;
+
+        var today = DateTime.UtcNow.Date;
+
+        // Check if already completed today
+        bool alreadyCompleted = habit.Completions.Any(c => c.Date == today);
+        if (alreadyCompleted) return false;
+
+        var completion = new HabitCompletion
+        {
+            HabitId = habit.Id,
+            Date = today
+        };
+
+        _dbContext.HabitCompletions.Add(completion);
         await _dbContext.SaveChangesAsync();
+
+        return true;
     }
 
-    return true;
-}
 }

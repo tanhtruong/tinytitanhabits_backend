@@ -11,6 +11,17 @@ using TinyTitanHabits.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowTinyTitanFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // your Vite dev URL
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // important if you ever send cookies
+    });
+});
+
 //load Load .env variables
 Env.Load();
 
@@ -73,6 +84,8 @@ builder.Services.AddSwaggerGen(c => {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TinyTitan API", Version = "v1" });
 });
 var app = builder.Build();
+
+app.UseCors("AllowTinyTitanFrontend");
 
 app.UseSwagger();
 app.UseSwaggerUI();

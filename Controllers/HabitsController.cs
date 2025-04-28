@@ -55,12 +55,14 @@ public class HabitsController : ControllerBase
         return NoContent();
     }
 
+
     [HttpPost("{habitId}/complete")]
     public async Task<IActionResult> CompleteHabit(Guid habitId)
     {
         var success = await _habitService.CompleteHabitTodayAsync(habitId);
-        if (!success) return NotFound();
+        if (!success) return BadRequest(new { message = "Already completed today or habit not found." });
 
         return Ok();
     }
+
 }
